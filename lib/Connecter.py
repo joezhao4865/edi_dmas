@@ -2,7 +2,7 @@ import pyodbc
 class connector:
     def __init__(self, dbName):
         self.conn = pyodbc.connect('Driver={SQL Server};'
-                      'Server=LAPTOP-IC51KS2G;'
+                      'Server=DESKTOP-TCPCELC;'
                       'Database='+dbName+';'
                       'Trusted_Connection=yes;')
         self.cursor = self.conn.cursor()
