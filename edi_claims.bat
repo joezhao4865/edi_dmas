@@ -1,0 +1,2 @@
+python edi.py
+pause
