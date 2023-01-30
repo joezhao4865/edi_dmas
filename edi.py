@@ -176,10 +176,10 @@ for key in visits.keys():
     starting_index = str(int(starting_index) + len(visits[key]))
     
     parent = ('Originals', 'Appeals', 'Cancels')[0 if claim_freq_type  == '1' else 1 if claim_freq_type == '7' else 2]
-    parentDir = 'C:\\Users\Becky\\Desktop\\claims\\AETV\\' + parent + '\\' + interchangeDate 
+    parentDir = 'C:\\Users\Becky\\Desktop\\claims\\MEDV\\' + parent + '\\' + interchangeDate 
     storagePath = parentDir + '\\' + visits[key][0].get_first_name() + '_' + visits[key][0].get_last_name()
     if not os.path.exists(storagePath):
-        os.mkdir(storagePath)
+        os.makedirs(storagePath)
     with open(storagePath + '\\' + interchangeDate+'_'+subscriberID+'.txt', 'w') as f:   
         f.write(outputData.getAvailityData())
 
