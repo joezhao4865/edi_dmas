@@ -133,14 +133,16 @@ connection = conn.getConnection()
 cursor = connection.cursor()
 # retrieve data from db. Proceed if data is returned otherwise exit
 try:
-    sql = 'select recipient_first_name, recipient_last_name, procedure_code, service_date, payer_code, work_units, unit_rate, modifier, service_address1, service_address2, service_city, service_state, service_zip, medicaid_id, auth_number from visits_staging'
+    sql = 'select recipient_first_name, recipient_last_name, procedure_code, service_date, payer_code, sum(work_units) as work_units, unit_rate, service_address1, service_address2, service_city, service_state, service_zip, medicaid_id, auth_number from visits_staging'
     
     if client_medicaid_ID != '':
         sql = sql + ' where medicaid_id = ' + client_medicaid_ID    
     else: 
         sql = sql + ' where payer_code = \'' + selectedPayer + '\''
         
-    sql = sql + ' and service_date between \'' + serviceStart + '\' and \'' + serviceEnd + '\' order by service_date'
+    sql = sql + ' and service_date between \'' + serviceStart + '\' and \'' + serviceEnd + '\''
+    sql = sql + ' group by recipient_first_name, recipient_last_name, procedure_code, service_date, payer_code, unit_rate,  service_address1, service_address2, service_city, service_state, service_zip, medicaid_id, auth_number'
+    sql = sql + ' order by service_date'
     cursor.execute(sql)    
     for row in cursor.fetchall():
         visit = Visit(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14])
