@@ -1,7 +1,7 @@
 class Constant:
     CUSTOMERID = '862830'
     PROVIDER_ENTITY_NAME = 'Becky Healthcare LLC'
-    PROVIDER_ADDRESS1 = '10135 Yorktown Dr.'
+    PROVIDER_ADDRESS1 = '10135 Yorktown Dr'
     PROVIDER_ADDRESS2 = ''
     PROVIDER_CITY = 'Great Falls'
     PROVIDER_STATE = 'VA'
