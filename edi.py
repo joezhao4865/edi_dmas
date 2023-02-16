@@ -184,11 +184,7 @@ for key in visits.keys():
     starting_index = str(int(starting_index) + len(visits[key]))
     
     parent = ('Originals', 'Appeals', 'Cancels')[0 if claim_freq_type  == '1' else 1 if claim_freq_type == '7' else 2]
-<<<<<<< HEAD
     parentDir = re.sub(r'\\', '\\\\\\\\', os.path.expanduser('~'))+'\\Documents\\claims\\MEDV\\' + parent + '\\' + interchangeDate 
-=======
-    parentDir = re.sub(r'\\', '\\\\\\\\', os.path.expanduser('~'))+'\\Documents\\claims\\AETV\\' + parent + '\\' + interchangeDate  
->>>>>>> f2f00ccbbfacb50c55cf5419f07ec5754f297d4c
     storagePath = parentDir + '\\' + visits[key][0].get_first_name() + '_' + visits[key][0].get_last_name()
     if not os.path.exists(storagePath):
         os.makedirs(storagePath)
