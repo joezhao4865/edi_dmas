@@ -16,9 +16,8 @@ class Claim:
         self.beneIdAssigned = 'Y'
         self.beneInfoRelease = 'Y'
         self.sigCode = sigCode
-        self.Reference = Reference(True, 'EA', 'AuthorizationInClaim')
     
     def getSegment(self):
         claimInfo = (''.join(['CLM*', '*'.join([self.claimId, self.billedAmt, self.clm03, self.clm04, ':'.join([self.facilityCode, self.facilityQualifier, self.freqCode]), self.sigOnFile, self.acceptCode, self.beneIdAssigned, self.beneInfoRelease, self.sigCode]), '~']), ''.join(['CLM*', '*'.join([self.claimId, self.billedAmt, self.clm03, self.clm04, ':'.join([self.facilityCode, self.facilityQualifier, self.freqCode]), self.sigOnFile, self.acceptCode, self.beneIdAssigned, self.beneInfoRelease]), '~']))[self.sigCode == '']
         
-        return self.delimiter.join(claimInfo, self.Reference.getSegment())
+        return claimInfo

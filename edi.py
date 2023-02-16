@@ -23,6 +23,7 @@ def CollectFiles(rootpath, destpath):
             else:
                 CollectFiles(newpath, destpath)
 
+claimToReplace = ''
 today = datetime.now()
 currentYear = today.year
 currentMonth = today.month
@@ -64,6 +65,11 @@ while not claim_freq_type.strip() in ['', '1', '7', '8']:
     claim_freq_type = input('what is the claim frequency type [origial/default = 1, replacement = 7, cancel/void = 8]? ')
     if claim_freq_type.strip() == '':
         claim_freq_type = '1'
+        
+if claim_freq_type.strip() in ['7','8']:
+    claimToReplace = input('Original Claim ID: ')
+    while claimToReplace.strip() == '':
+        claimToReplace = input('Original Claim ID: ')
 
 selectedPayer = ''
 if single_batch.strip() == 'b':
@@ -136,11 +142,14 @@ try:
     sql = 'select recipient_first_name, recipient_last_name, procedure_code, service_date, payer_code, work_units, unit_rate, modifier, service_address1, service_address2, service_city, service_state, service_zip, medicaid_id, auth_number from visits_staging'
     
     if client_medicaid_ID != '':
-        sql = sql + ' where medicaid_id = ' + client_medicaid_ID    
+        sql = sql + ' where medicaid_id = \'' + client_medicaid_ID + '\''   
     else: 
         sql = sql + ' where payer_code = \'' + selectedPayer + '\''
         
-    sql = sql + ' and service_date between \'' + serviceStart + '\' and \'' + serviceEnd + '\' order by service_date'
+    sql = sql + ' and service_date between \'' + serviceStart + '\' and \'' + serviceEnd + '\''
+    #sql = sql + ' group by recipient_first_name, recipient_last_name, procedure_code, service_date, payer_code, unit_rate,  service_address1, service_address2, service_city, service_state, service_zip, medicaid_id, auth_number'
+    sql = sql + ' order by service_date'
+    
     cursor.execute(sql)    
     for row in cursor.fetchall():
         visit = Visit(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14])
@@ -156,11 +165,11 @@ finally:
 # for each client do the following if batch creation
 for key in visits.keys():
     total_billed = sum([v.get_units() * v.get_rate() for v in visits[key]])
-    claimHeader = ClaimHeader(dilimiter, starting_index, interchange_type, claim_freq_type, total_billed, visits[key][0])
+    claimHeader = ClaimHeader(dilimiter, starting_index, interchange_type, claim_freq_type, total_billed, visits[key][0], claimToReplace)
 
     (interchangeDate, subscriberID, resultList) = claimHeader.get()
 
-    serviceLines = ServiceLines(dilimiter, interchangeDate, subscriberID, is_live_in, serviceStart, serviceEnd, visits[key])
+    serviceLines = ServiceLines(dilimiter, interchangeDate, subscriberID, starting_index, is_live_in, serviceStart, serviceEnd, visits[key])
     resultList.append((serviceLines.get(), 'ServiceLines'))
 
     ###########################################
@@ -176,7 +185,7 @@ for key in visits.keys():
     starting_index = str(int(starting_index) + len(visits[key]))
     
     parent = ('Originals', 'Appeals', 'Cancels')[0 if claim_freq_type  == '1' else 1 if claim_freq_type == '7' else 2]
-    parentDir = 'C:\\Users\Becky\\Desktop\\claims\\MEDV\\' + parent + '\\' + interchangeDate 
+    parentDir = re.sub(r'\\', '\\\\\\\\', os.path.expanduser('~'))+'\\Documents\\claims\\MEDV\\' + parent + '\\' + interchangeDate 
     storagePath = parentDir + '\\' + visits[key][0].get_first_name() + '_' + visits[key][0].get_last_name()
     if not os.path.exists(storagePath):
         os.makedirs(storagePath)

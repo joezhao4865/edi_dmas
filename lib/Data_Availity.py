@@ -17,12 +17,13 @@ class Data_Availity:
         self.Payer = ''
         self.Claim = ''
         self.MedicalReference = ''
+        self.OriginalClaimReference = ''
         self.HI = ''
         self.RenderingProvider = ''
         self.ServiceFacility = ''
         self.ServiceLines = ''
         self.SE = ''
-        self.segments = []
+        self.segments = [] # this is the array storing the resulting segment strings
         self.setSegmentsData(segments) 
         
         
@@ -40,11 +41,11 @@ class Data_Availity:
         
         if self.MedicalReference != '':
             self.segments.append(self.MedicalReference)
+        
+        if self.OriginalClaimReference != '':
+            self.segments.append(self.OriginalClaimReference)
             
         self.segments.append(self.HI)
-        
-        if self.RenderingProvider != '':
-            self.segments.append(self.RenderingProvider)
         
         if self.ServiceFacility != '':
             self.segments.append(self.ServiceFacility)
