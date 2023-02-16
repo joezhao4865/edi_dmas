@@ -149,7 +149,6 @@ try:
     sql = sql + ' and service_date between \'' + serviceStart + '\' and \'' + serviceEnd + '\''
     #sql = sql + ' group by recipient_first_name, recipient_last_name, procedure_code, service_date, payer_code, unit_rate,  service_address1, service_address2, service_city, service_state, service_zip, medicaid_id, auth_number'
     sql = sql + ' order by service_date'
-    
     cursor.execute(sql)    
     for row in cursor.fetchall():
         visit = Visit(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14])
@@ -185,7 +184,11 @@ for key in visits.keys():
     starting_index = str(int(starting_index) + len(visits[key]))
     
     parent = ('Originals', 'Appeals', 'Cancels')[0 if claim_freq_type  == '1' else 1 if claim_freq_type == '7' else 2]
+<<<<<<< HEAD
     parentDir = re.sub(r'\\', '\\\\\\\\', os.path.expanduser('~'))+'\\Documents\\claims\\MEDV\\' + parent + '\\' + interchangeDate 
+=======
+    parentDir = re.sub(r'\\', '\\\\\\\\', os.path.expanduser('~'))+'\\Documents\\claims\\AETV\\' + parent + '\\' + interchangeDate  
+>>>>>>> f2f00ccbbfacb50c55cf5419f07ec5754f297d4c
     storagePath = parentDir + '\\' + visits[key][0].get_first_name() + '_' + visits[key][0].get_last_name()
     if not os.path.exists(storagePath):
         os.makedirs(storagePath)
