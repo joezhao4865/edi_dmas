@@ -13,7 +13,8 @@ class Constant:
     HOURLY_RATE = 21.79
     EIN = '834415175'
     PXC = '251E00000X'
-    SENDERID = '6317'
+    AETVBILLERID = '214557'
+    SENDERID = '870047'
     SVPXC = {
         'T1019': '3747P1801X',
         'T1005': 'QQQYYYYYYY',
