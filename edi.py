@@ -92,44 +92,77 @@ if single_batch.strip() == 's':
         if client_medicaid_ID == '':
             print('Please provide client medicaid ID')
 
-service_year = input('Whcih year is the claim for (please enter a full year and up to last 3 years)? ')
-while len(service_year.strip()) > 0 and (not re.match(r'\d\d\d\d', service_year) or int(service_year) > currentYear or int(service_year) < currentYear - 3):
-    print('Invalid year value provided. Either go with current year or press Ctrl+c to terminate program')
-    service_year = input('Whcih year is the claim for (please enter a full year and up to last 3 years)? ')
-if len(service_year.strip()) == 0:
-    service_year = str(currentYear)
-
-service_month = input('Whcih month is the claim to be created (default to current month) [1-12]? ')
-while len(service_month.strip()) > 0 and (int(service_month) < 1 or int(service_month) > 12):
-    service_month = input('Whcih month is the claim to be created (default to current month) [1-12]? ')
-if len(service_month.strip()) == 0:
-    service_month = f'{currentMonth:0>2}'
-else:
-    service_month = f'{service_month:0>2}'
-    
-service_start_date = input('What day did the service start (default to 1)? [1-31]? ')
-while len(service_start_date.strip()) > 0 and not 1<= int(service_start_date) <= monthEnds[service_month.lstrip('0')]:
-    print('Invalid date provided. Either go with the first day of the month or press Ctrl+c to terminate program')
-    service_start_date = input('What day did the service start (default to 1)? [1-31]? ')
-if len(service_start_date.strip()) == 0:
-    service_start_date = '01'
-else:   
-    service_start_date = f'{service_start_date:0>2}'
-
-service_end_date = input('What day did the service end (default to 1)? [1-31]? ')
-while len(service_end_date.strip()) > 0 and (not 1<= int(service_end_date) <= monthEnds[service_month.lstrip('0')] or int(service_end_date) < int(service_start_date)):
-    if int(service_end_date) < int(service_start_date):
-        print('End date comes before start date')
+validDate = False
+while not validDate:
+    validDate = True
+    service_start_date = input('Service start date - YYMMDD: ').strip()
+    if service_start_date == '':
+        validDate = True
+    elif re.match(r'\d{6}$', service_start_date):
+        year = 2000 + int(service_start_date[:2])
+        month = service_start_date[2:4].strip('0')
+        date = int(service_start_date[-2:])
+        if month in ['1','3','4','5','6','7','8','9','10','11','12'] and (date > monthEnds[month] or date < 1):
+            print('Wrong date of month')
+            validDate = False
+        elif int(month) < 1 or int(month) > 12:
+            print('Wrong month of year')
+            validDate = False
+        elif year > currentYear:
+            print('No future date will be considered')
+            validDate = False
+        elif year < currentYear - 3:
+            print('Only dates in last 3 years allowed')
+            validDate = False
+        elif month == '2':
+            if date > 29 or date == 29 and not LeapYearChecker(year).isLeapYear():
+                print('Invalid date in Februrary')
+                validDate = False       
     else:
-        print('Invalid date provided. Either go with the last day of the month or press Ctrl+c to terminate program')
-    service_end_date = input('What day did the service end (default to 1)? [1-31]? ')
-if len(service_end_date.strip()) == 0:
-    service_end_date = str(monthEnds[str(currentMonth).lstrip('0')])
+        print('Invalid date value')
+        validDate = False
+if service_start_date == '':
+    print(today.date)
+    service_start_date = str(currentYear)+f'{currentMonth:0>2}'+f'{today.day:0>2}'
 else:
-    service_end_date = f'{service_end_date:0>2}'
+    service_start_date = '20' + service_start_date
 
-serviceStart = ''.join([service_year, service_month, service_start_date])
-serviceEnd = ''.join([service_year, service_month, service_end_date])
+validDate = False
+while not validDate:
+    validDate = True
+    service_end_date = input('Service end date - YYMMDD: ').strip()
+    if service_end_date == '':
+        validDate = True
+    elif re.match(r'\d{6}$', service_end_date):
+        year = 2000 + int(service_end_date[:2])
+        month = service_end_date[2:4].strip('0')
+        date = int(service_end_date[-2:])
+        if month in ['1','3','4','5','6','7','8','9','10','11','12'] and (date > monthEnds[month] or date < 1):
+            print('Wrong date of month')
+            validDate = False
+        elif int(month) < 1 or int(month) > 12:
+            print('Wrong month of year')
+            validDate = False
+        elif year > currentYear:
+            print('No future date will be considered')
+            validDate = False
+        elif year < currentYear - 3:
+            print('Only dates in last 3 years allowed')
+            validDate = False
+        elif month == '2':
+            if date > 29 or date == 29 and not LeapYearChecker(year).isLeapYear():
+                print('Invalid date in Februrary')
+                validDate = False
+        elif int(service_end_date) < int(service_start_date[2:]):
+            print('Service end date should be after start date')
+            validDate = False
+    else:
+        print('Invalid date value')
+        validDate = False
+if service_end_date == '':
+    service_end_date = service_start_date
+else:
+    service_end_date = '20' + service_end_date
 dilimiter = ('', '\n')[interchange_type in ['l', 'L']] 
 
 visits = {}
@@ -146,7 +179,7 @@ try:
     else: 
         sql = sql + ' where payer_code = \'' + selectedPayer + '\''
         
-    sql = sql + ' and service_date between \'' + serviceStart + '\' and \'' + serviceEnd + '\''
+    sql = sql + ' and service_date between \'' + service_start_date + '\' and \'' + service_end_date + '\''
     #sql = sql + ' group by recipient_first_name, recipient_last_name, procedure_code, service_date, payer_code, unit_rate,  service_address1, service_address2, service_city, service_state, service_zip, medicaid_id, auth_number'
     sql = sql + ' order by service_date'
     cursor.execute(sql)    
@@ -168,7 +201,7 @@ for key in visits.keys():
 
     (interchangeDate, subscriberID, resultList) = claimHeader.get()
 
-    serviceLines = ServiceLines(dilimiter, interchangeDate, subscriberID, starting_index, is_live_in, serviceStart, serviceEnd, visits[key])
+    serviceLines = ServiceLines(dilimiter, interchangeDate, subscriberID, starting_index, is_live_in, service_start_date, service_end_date, visits[key])
     resultList.append((serviceLines.get(), 'ServiceLines'))
 
     ###########################################
