@@ -10,7 +10,7 @@ class Submitter:
         self.nm06 = ''
         self.nm07 = ''
         self.nm08 = '46' # ETIN not SSN
-        self.nm09 = self.CONSTANT.AETVBILLERID + self.CONSTANT.SENDERID  # Can EIN be ETIN for availity, or it needs to be sender id?
+        self.nm09 = self.CONSTANT.SENDERID  # Can EIN be ETIN for availity, or it needs to be sender id?
         
         
     def getSegment(self):

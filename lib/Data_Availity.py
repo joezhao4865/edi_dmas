@@ -17,7 +17,7 @@ class Data_Availity:
         self.Payer = ''
         self.Claim = ''
         self.MedicalReference = ''
-        self.OriginalClaimReference = ''
+        self.AuthReference = ''
         self.HI = ''
         self.RenderingProvider = ''
         self.ServiceFacility = ''
@@ -41,11 +41,12 @@ class Data_Availity:
         
         if self.MedicalReference != '':
             self.segments.append(self.MedicalReference)
-        
-        if self.OriginalClaimReference != '':
-            self.segments.append(self.OriginalClaimReference)
             
+        self.segments.append(self.AuthReference)
         self.segments.append(self.HI)
+        
+        if self.RenderingProvider != '':
+            self.segments.append(self.RenderingProvider)
         
         if self.ServiceFacility != '':
             self.segments.append(self.ServiceFacility)

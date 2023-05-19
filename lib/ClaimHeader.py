@@ -9,7 +9,6 @@ from lib.BHT_Availity import *
 from lib.Constants import *
 from lib.Submitter import *
 from lib.SubmitterContact import *
-from lib.Taxonomy import *
 from lib.Receiver import *
 from lib.HL_Provider_Availity import *
 from lib.BillingProvider import *
@@ -25,6 +24,7 @@ from lib.Reference import *
 from lib.HI import *
 from lib.RenderingProvider import *
 from lib.ServiceFacility import *
+from lib.Taxonomy import *
 
 from datetime import datetime
 
@@ -61,7 +61,7 @@ class ClaimHeader:
         Av_IEA = IEA_Availity('1', controlNumber)
         
         # GS/GE Segment
-        Av_GS = GS_Availity(Av_ISA.getSenderId(), 'VAMMIS FA', interchangeFullDate, interchangeTime, controlNumber)
+        Av_GS = GS_Availity(Av_ISA.getSenderId(), Av_ISA.getReceiverId(), interchangeFullDate, interchangeTime, controlNumber)
         Av_GE = GE_Availity('1', controlNumber)
         
         #ST Segment       
@@ -84,8 +84,7 @@ class ClaimHeader:
         Av_Receiver = Receiver('Dept of Med Assist Svcs', Av_ISA.getReceiverId())
         
         # Billing Provider Hierarchical Level
-        Av_Taxonomy = Taxonomy('BI')
-        Av_HL_Provider = HL_Provider_Availity(self.dilimiter, Av_Taxonomy)
+        Av_HL_Provider = HL_Provider_Availity(self.dilimiter, True, True)
         
         # Billing Provider Info
         Av_BillingProvider = BillingProvider(self.dilimiter)
@@ -95,7 +94,7 @@ class ClaimHeader:
         
         # Subscriber Info
         Av_SubscriberHeader = SubscriberHeader()
-        Av_SubscriberName = SubscriberName(self.subscriber.get_medicaid_id(), self.subscriber.get_first_name(), self.subscriber.get_last_name())
+        Av_SubscriberName = SubscriberName(self.subscriber.get_medicaid_id(), self.subscriber.get_last_name(), self.subscriber.get_first_name())
         Av_SubscriberAddress = Address(True, self.dilimiter, self.subscriber.get_address1().strip(), self.subscriber.get_address2().strip(), self.subscriber.get_city().strip(), self.subscriber.get_state().strip(), self.subscriber.get_zip())
         Av_SubscriberDmg = SubscriberDmg(self.clientInfo['dob'], self.clientInfo['sex'])
         Av_Subscriber = Subscriber(Av_SubscriberHeader.getSegment(), Av_SubscriberName.getSegment(), Av_SubscriberAddress.getSegment(), Av_SubscriberDmg.getSegment(), self.dilimiter)
@@ -103,20 +102,19 @@ class ClaimHeader:
         
         # Payer Info
         Av_PayerAddress = Address(False, self.dilimiter, '12727 Fantasia Drive', '', 'Herndon', 'VA', '20170').getSegment()
-        Av_Payer = Payer(self.dilimiter, 'VIRGINIA DEPARTMENT OF MEDICAL ASSISTANCE SERVICES (DMAS)', '7737', Av_PayerAddress)
+        Av_Payer = Payer(self.dilimiter, 'VAMMIS FA', 'DMAS MEDICAID', Av_PayerAddress)
         
         # Claim Info
-        Av_Claim = Claim(self.dilimiter, Av_SubscriberName.getPatientID(), self.billing_total, self.claimFreqType, self.subscriber.get_zip())
+        Av_Claim = Claim(Av_SubscriberName.getPatientID(), self.billing_total, self.claimFreqType, self.subscriber.get_zip())
         
-        # Subscriber Authorization Reference. If this segment is required, set the first argument to 'True' and provide other info
-        Av_MedicalReference = Reference(True, 'G1', self.subscriber.get_auth_number())
-        Av_OriginalClaimRef = Reference(self.originalClaimID != '', 'F8', self.originalClaimID)
-        
+        # Original Claim Reference. If this segment is required, set the first argument to 'True' and provide other info
+        Av_MedicalReference = Reference(self.originalClaimID != '', 'F8', self.originalClaimID)
+        Av_AuthReference = Reference(True, 'G1', self.subscriber.get_auth_number())
         # HI
-        Av_HI = HI(self.dilimiter, self.clientInfo['diagcode'][0], self.clientInfo['diagcode'][1:])
+        Av_HI = HI(self.clientInfo['diagcode'][0], self.clientInfo['diagcode'][1:])
         
         # Rendering provider (Optional) PCA part
-        Av_RenderingProvider = RenderingProvider(self.dilimiter, Taxonomy('PE'), True)
+        Av_RenderingProvider = RenderingProvider(True, self.dilimiter, Taxonomy('PE').getSegment())
         #if self.pca != '':
         #    Av_RenderingProvider = RenderingProvider(True, self.pca['firstname'], self.pca['lastname'])
             
@@ -125,7 +123,7 @@ class ClaimHeader:
         FacilityAddress = Address(True, self.dilimiter, self.CONSTANT.PROVIDER_ADDRESS1, self.CONSTANT.PROVIDER_ADDRESS2, self.CONSTANT.PROVIDER_CITY, self.CONSTANT.PROVIDER_STATE, self.CONSTANT.PROVIDER_ZIP)
         Av_ServiceFacility = ServiceFacility()
         
-        headerList = [(Av_ISA, 'ISA'), (Av_IEA, 'IEA'), (Av_GS, 'GS'), (Av_GE, 'GE'), (Av_ST, 'ST'), (Av_BHT, 'BHT'), (Av_Submitter, 'Submitter'), (Av_Contact, 'Contact'), (Av_Receiver, 'Receiver'), (Av_HL_Provider, 'ProviderHL'), (Av_BillingProvider, 'ProviderInfo'), (Av_SubscriberHL, 'SubscriberHL'), (Av_Subscriber, 'Subscriber'), (Av_Payer, 'Payer'), (Av_Claim, 'Claim'), (Av_HI, 'HI'), (Av_RenderingProvider, 'RenderingProvider'), (Av_ServiceFacility, 'ServiceFacility'), (Av_MedicalReference, 'MedicalReference'), (Av_OriginalClaimRef, 'OriginalClaimReference')]
+        headerList = [(Av_ISA, 'ISA'), (Av_IEA, 'IEA'), (Av_GS, 'GS'), (Av_GE, 'GE'), (Av_ST, 'ST'), (Av_BHT, 'BHT'), (Av_Submitter, 'Submitter'), (Av_Contact, 'Contact'), (Av_Receiver, 'Receiver'), (Av_HL_Provider, 'ProviderHL'), (Av_BillingProvider, 'ProviderInfo'), (Av_SubscriberHL, 'SubscriberHL'), (Av_Subscriber, 'Subscriber'), (Av_Payer, 'Payer'), (Av_Claim, 'Claim'), (Av_HI, 'HI'), (Av_RenderingProvider, 'RenderingProvider'), (Av_ServiceFacility, 'ServiceFacility'), (Av_MedicalReference, 'MedicalReference'), (Av_AuthReference, 'AuthReference')]
         
         return (interchangeDate, Av_SubscriberName.getPatientID(), headerList)
                 

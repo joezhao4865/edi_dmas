@@ -5,7 +5,7 @@ class Reference:
         self.medicalRecordNumber = medRcordNumber
     
     def getSegment(self):
-        return ('', ''.join(['REF*', '*'.join([self.qualifier, self.medicalRecordNumber]), '~']))[self.required]
+        return ('', '*'.join(['REF', self.qualifier, self.medicalRecordNumber+'~']))[self.required]
     
     def required(self):
         return self.required

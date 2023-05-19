@@ -5,7 +5,7 @@ class Address:
         self.address1 = address1
         self.address2 = address2
         self.city = city
-        self.state = state
+        self.state = state.strip(' ')
         self.zip = zip
     
     def getSegment(self):

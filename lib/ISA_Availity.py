@@ -10,12 +10,12 @@ class ISA_Availity:
         self.isa01 = '00'
         self.isa02 = ' '*10
         self.isa03 = '00'
-        self.isa04 = 'CYCTRANS  '
+        self.isa04 = ' '*10
         self.isa05 = 'ZZ'
         self.isa06_1 = self.CONSTANT.SENDERID
         self.isa06 = self.isa06_1 + ' '*(15-len(self.isa06_1))
         self.isa07 = 'ZZ'
-        self.isa08_1 = 'CLAIMSCH' # might be VAMMIS FA
+        self.isa08_1 = 'VAMMIS FA'
         self.isa08 = self.isa08_1 + ' '*(15-len(self.isa08_1))
         self.isa09 = interchangeDate
         self.isa10 = interchangeTime

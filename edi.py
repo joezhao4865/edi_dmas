@@ -19,14 +19,19 @@ def CollectFiles(rootpath, destpath):
         for file in os.listdir(rootpath):
             newpath = rootpath+'\\'+file
             if os.path.isfile(newpath):
-                shutil.copy(newpath, destpath)
+                if not os.path.exists(destpath + '\\' + file):
+                    shutil.copy(newpath, destpath)
             else:
                 CollectFiles(newpath, destpath)
+
+def time_to_string(date1):
+    return ''.join(str(date1).split(' ')[1].split(':')[:2])
 
 claimToReplace = ''
 today = datetime.now()
 currentYear = today.year
 currentMonth = today.month
+currentTime= re.sub(r':', '', str(today.time()).split('.')[0])
 checkLeapYear = LeapYearChecker(currentYear)
 monthEnds = {'1': 31, '2': (28, 29)[checkLeapYear.isLeapYear()], '3': 31, '4': 30, '5': 31, '6': 30, '7': 31, '8': 31, '9': 30, '10': 31, '11': 30, '12': 31}
 
@@ -163,6 +168,7 @@ if service_end_date == '':
     service_end_date = service_start_date
 else:
     service_end_date = '20' + service_end_date
+
 dilimiter = ('', '\n')[interchange_type in ['l', 'L']] 
 
 visits = {}
@@ -172,10 +178,10 @@ connection = conn.getConnection()
 cursor = connection.cursor()
 # retrieve data from db. Proceed if data is returned otherwise exit
 try:
-    sql = 'select recipient_first_name, recipient_last_name, procedure_code, service_date, payer_code, work_units, unit_rate, modifier, service_address1, service_address2, service_city, service_state, service_zip, medicaid_id, auth_number from visits_staging'
+    sql = 'select pca_first_name, pca_last_name, pca_username, recipient_first_name, recipient_last_name, procedure_code, service_date, payer_code, work_units, adjusted_units, unit_rate, modifier, service_address1, service_address2, service_city, service_state, service_zip, end_address1, end_address2, end_city, end_state, end_zip, medicaid_id, auth_number, clock_in, clock_out from visits_staging'
     
     if client_medicaid_ID != '':
-        sql = sql + ' where medicaid_id = \'' + client_medicaid_ID + '\''   
+        sql = sql + ' where medicaid_id = \'' + client_medicaid_ID + '\''  
     else: 
         sql = sql + ' where payer_code = \'' + selectedPayer + '\''
         
@@ -184,7 +190,8 @@ try:
     sql = sql + ' order by service_date'
     cursor.execute(sql)    
     for row in cursor.fetchall():
-        visit = Visit(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14])
+        clockInTime, clockOutTime = time_to_string(row[24]), time_to_string(row[25]), 
+        visit = Visit(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20], row[21], row[22], row[23], clockInTime, clockOutTime)
         if not visit.get_medicaid_id() in visits:
             visits[visit.get_medicaid_id()] = []
         visits[visit.get_medicaid_id()].append(visit)
@@ -216,17 +223,20 @@ for key in visits.keys():
     outputData.setSE(Av_SE.getSegment())
     starting_index = str(int(starting_index) + len(visits[key]))
     
-    parent = ('Originals', 'Appeals', 'Cancels')[0 if claim_freq_type  == '1' else 1 if claim_freq_type == '7' else 2]
-    parentDir = re.sub(r'\\', '\\\\\\\\', os.path.expanduser('~'))+'\\Documents\\claims\\MEDV\\' + parent + '\\' + interchangeDate 
-    storagePath = parentDir + '\\' + visits[key][0].get_first_name() + '_' + visits[key][0].get_last_name()
-    if not os.path.exists(storagePath):
-        os.makedirs(storagePath)
-    with open(storagePath + '\\' + interchangeDate+'_'+subscriberID+'.txt', 'w') as f:   
-        f.write(outputData.getAvailityData())
+    if interchange_type in ['p', 'P']:
+        parent = ('Originals', 'Appeals', 'Cancels')[0 if claim_freq_type  == '1' else 1 if claim_freq_type == '7' else 2]
+        parentDir = re.sub(r'\\', '\\\\\\\\', os.path.expanduser('~'))+'\\Documents\\claims\\MEDV\\' + parent + '\\' + interchangeDate 
+        storagePath = parentDir + '\\' + visits[key][0].get_first_name() + '_' + visits[key][0].get_last_name()
+        if not os.path.exists(storagePath):
+            os.makedirs(storagePath)
+        with open(''.join([storagePath,'\\',interchangeDate,'_',visits[key][0].get_first_name()[0],visits[key][0].get_last_name()[0],currentTime,interchange_type.upper(),'.txt']), 'w') as f:   
+            f.write(outputData.getAvailityData())
+    else:   
+        print(outputData.getAvailityData())
 
-
-CollectFiles(parentDir, parentDir)
+if interchange_type in ['p', 'P']:
+    CollectFiles(parentDir, parentDir)
         
-print('next starting index: ' + str(int(starting_index)))
+print('next starting index: ' + starting_index)
 
 
