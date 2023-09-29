@@ -16,6 +16,7 @@ class Data_Availity:
         self.Subscriber = ''
         self.Payer = ''
         self.Claim = ''
+        self.Attachment = ''
         self.MedicalReference = ''
         self.AuthReference = ''
         self.HI = ''
@@ -38,6 +39,9 @@ class Data_Availity:
     
     def mergeSegments(self):
         self.segments = [self.ISA, self.GS, self.ST, self.BHT, self.Submitter, self.Contact, self.Receiver, self.ProviderHL, self.ProviderInfo, self.SubscriberHL, self.Subscriber, self.Payer, self.Claim]
+        
+        if self.Attachment !='':
+            self.segments.append(self.Attachment)
         
         if self.MedicalReference != '':
             self.segments.append(self.MedicalReference)

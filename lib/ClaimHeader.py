@@ -25,12 +25,13 @@ from lib.HI import *
 from lib.RenderingProvider import *
 from lib.ServiceFacility import *
 from lib.Taxonomy import *
+from lib.Attachment import *
 
 from datetime import datetime
 
 class ClaimHeader:
     # pcaData should be a dict with keys: firstname and lastname
-    def __init__(self, dilimiter, startingIndex, interchangeType, claimFreqType, total, sbrData, originalClaim = '', pcaData = ''):
+    def __init__(self, dilimiter, startingIndex, interchangeType, claimFreqType, total, sbrData, originalClaim, add_attachment, attachment_index, pcaData = ''):
         self.startingIndex = startingIndex
         self.dilimiter = dilimiter
         self.CONSTANT = Constant()
@@ -42,6 +43,8 @@ class ClaimHeader:
         self.headerList = []
         self.clientInfo = Clients.clients[sbrData.get_medicaid_id()]
         self.originalClaimID = originalClaim
+        self.attachment = add_attachment
+        self.attachmentIdx = attachment_index
         
     def get(self):
         ####################
@@ -52,7 +55,7 @@ class ClaimHeader:
         interchangeDate = ''.join([str(today.year % 100), f'{today.month:0>2}', f'{today.day:0>2}'])
         interchangeTime = ''.join([f'{today.hour:0>2}', f'{today.minute:0>2}'])
         controlNumber = interchangeDate[-4:]+f'{self.startingIndex:0>5}'
-        
+        attachment_control_number = ''.join([self.subscriber.medicaidID, f'{today.month:0>2}', f'{today.day:0>2}', str(today.year), f'{self.attachmentIdx:0>5}']) if self.attachment else ''
         #############################
         # initializing each segment #
         #############################
@@ -106,7 +109,7 @@ class ClaimHeader:
         
         # Claim Info
         Av_Claim = Claim(Av_SubscriberName.getPatientID(), self.billing_total, self.claimFreqType, self.subscriber.get_zip())
-        
+        Av_Attachment = Attachment(self.attachment, attachment_control_number)
         # Original Claim Reference. If this segment is required, set the first argument to 'True' and provide other info
         Av_MedicalReference = Reference(self.originalClaimID != '', 'F8', self.originalClaimID)
         Av_AuthReference = Reference(True, 'G1', self.subscriber.get_auth_number())
@@ -123,7 +126,7 @@ class ClaimHeader:
         FacilityAddress = Address(True, self.dilimiter, self.CONSTANT.PROVIDER_ADDRESS1, self.CONSTANT.PROVIDER_ADDRESS2, self.CONSTANT.PROVIDER_CITY, self.CONSTANT.PROVIDER_STATE, self.CONSTANT.PROVIDER_ZIP)
         Av_ServiceFacility = ServiceFacility()
         
-        headerList = [(Av_ISA, 'ISA'), (Av_IEA, 'IEA'), (Av_GS, 'GS'), (Av_GE, 'GE'), (Av_ST, 'ST'), (Av_BHT, 'BHT'), (Av_Submitter, 'Submitter'), (Av_Contact, 'Contact'), (Av_Receiver, 'Receiver'), (Av_HL_Provider, 'ProviderHL'), (Av_BillingProvider, 'ProviderInfo'), (Av_SubscriberHL, 'SubscriberHL'), (Av_Subscriber, 'Subscriber'), (Av_Payer, 'Payer'), (Av_Claim, 'Claim'), (Av_HI, 'HI'), (Av_RenderingProvider, 'RenderingProvider'), (Av_ServiceFacility, 'ServiceFacility'), (Av_MedicalReference, 'MedicalReference'), (Av_AuthReference, 'AuthReference')]
+        headerList = [(Av_ISA, 'ISA'), (Av_IEA, 'IEA'), (Av_GS, 'GS'), (Av_GE, 'GE'), (Av_ST, 'ST'), (Av_BHT, 'BHT'), (Av_Submitter, 'Submitter'), (Av_Contact, 'Contact'), (Av_Receiver, 'Receiver'), (Av_HL_Provider, 'ProviderHL'), (Av_BillingProvider, 'ProviderInfo'), (Av_SubscriberHL, 'SubscriberHL'), (Av_Subscriber, 'Subscriber'), (Av_Payer, 'Payer'), (Av_Claim, 'Claim'), (Av_Attachment, 'Attachment'), (Av_HI, 'HI'), (Av_RenderingProvider, 'RenderingProvider'), (Av_ServiceFacility, 'ServiceFacility'), (Av_MedicalReference, 'MedicalReference'), (Av_AuthReference, 'AuthReference')]
         
         return (interchangeDate, Av_SubscriberName.getPatientID(), headerList)
                 

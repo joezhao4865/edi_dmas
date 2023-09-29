@@ -76,6 +76,19 @@ if claim_freq_type.strip() in ['7','8']:
     while claimToReplace.strip() == '':
         claimToReplace = input('Original Claim ID: ')
 
+need_attachment = input('Do you need submit attachment [Y|N]')
+attachment = False
+attachment_index = ''
+while need_attachment != '' and not re.match(r'[YyNn]', need_attachment.strip()):
+    print("please type 'Y' or 'N'")
+    need_attachment = input('Do you need submit attachment [Y|N]')
+if need_attachment.lower() in ['y', 'yes', 'ye', 'yup', 'yeah']:
+    attachment = True
+    attachment_index = input('Enter attachment file index [1-99999]')
+    while not re.match(r'^\d{1,5}$', attachment_index.strip()):
+        print('Please enter a number between 1 and 99999')
+        attachment_index = input('Enter attachment file index [1-99999]')
+
 selectedPayer = ''
 if single_batch.strip() == 'b':
     payerOptions = []
@@ -204,7 +217,7 @@ finally:
 # for each client do the following if batch creation
 for key in visits.keys():
     total_billed = sum([v.get_units() * v.get_rate() for v in visits[key]])
-    claimHeader = ClaimHeader(dilimiter, starting_index, interchange_type, claim_freq_type, total_billed, visits[key][0], claimToReplace)
+    claimHeader = ClaimHeader(dilimiter, starting_index, interchange_type, claim_freq_type, total_billed, visits[key][0], claimToReplace, attachment, attachment_index)
 
     (interchangeDate, subscriberID, resultList) = claimHeader.get()
 
@@ -238,5 +251,4 @@ if interchange_type in ['p', 'P']:
     CollectFiles(parentDir, parentDir)
         
 print('next starting index: ' + starting_index)
-
 
