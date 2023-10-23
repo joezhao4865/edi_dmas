@@ -4,7 +4,7 @@ class Taxonomy:
         self.CONSTANT = Constant()
         self.prv01 = qualifier # code for submitter
         self.prv02 = 'PXC'  # entity not person which is 1
-        self.prv03 = self.CONSTANT.PXC if proc == '' else self.CONSTANT.SVPXC[proc]
+        self.prv03 = self.CONSTANT.SVPXC[proc]
         
         
         

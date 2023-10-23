@@ -7,6 +7,9 @@ class Attachment:
         self.pwk04 = ''
         self.pwk05 = 'AC'
         self.controlNumber = controlnum
+        self.pwk07 = ''
+        self.pwk08=''
+        self.pwk09=''
     
     def getSegment(self):
-        return ('', '*'.join(['PWK', self.reportTypeCode, self.transmissionCode, self.pwk03, self.pwk04, self.pwk05, self.controlNumber]))[0 if not self.attach else 1]
+        return ('', ''.join(['PWK*', '*'.join([self.reportTypeCode, self.transmissionCode, self.pwk03, self.pwk04, self.pwk05, self.controlNumber, self.pwk07, self.pwk08, self.pwk09]), '~']))[0 if not self.attach else 1]

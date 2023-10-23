@@ -202,12 +202,14 @@ try:
     #sql = sql + ' group by recipient_first_name, recipient_last_name, procedure_code, service_date, payer_code, unit_rate,  service_address1, service_address2, service_city, service_state, service_zip, medicaid_id, auth_number'
     sql = sql + ' order by service_date'
     cursor.execute(sql)    
-    for row in cursor.fetchall():
+    for row in cursor.fetchall(): 
         clockInTime, clockOutTime = time_to_string(row[24]), time_to_string(row[25]), 
         visit = Visit(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20], row[21], row[22], row[23], clockInTime, clockOutTime)
-        if not visit.get_medicaid_id() in visits:
-            visits[visit.get_medicaid_id()] = []
-        visits[visit.get_medicaid_id()].append(visit)
+        
+        med_id = visit.get_medicaid_id() + ':' + visit.get_proc_code()
+        if not med_id in visits:
+            visits[med_id] = []            
+        visits[med_id].append(visit) 
 finally:
     cursor.close()
     conn.close()
@@ -216,6 +218,7 @@ finally:
 
 # for each client do the following if batch creation
 for key in visits.keys():
+    proc_code = key.split(':')[1]
     total_billed = sum([v.get_units() * v.get_rate() for v in visits[key]])
     claimHeader = ClaimHeader(dilimiter, starting_index, interchange_type, claim_freq_type, total_billed, visits[key][0], claimToReplace, attachment, attachment_index)
 
@@ -242,7 +245,7 @@ for key in visits.keys():
         storagePath = parentDir + '\\' + visits[key][0].get_first_name() + '_' + visits[key][0].get_last_name()
         if not os.path.exists(storagePath):
             os.makedirs(storagePath)
-        with open(''.join([storagePath,'\\',interchangeDate,'_',visits[key][0].get_first_name()[0],visits[key][0].get_last_name()[0],currentTime,interchange_type.upper(),'.txt']), 'w') as f:   
+        with open(''.join([storagePath,'\\',interchangeDate,'_',visits[key][0].get_first_name()[0],visits[key][0].get_last_name()[0],proc_code,currentTime,interchange_type.upper(),'.txt']), 'w') as f:   
             f.write(outputData.getAvailityData())
     else:   
         print(outputData.getAvailityData())

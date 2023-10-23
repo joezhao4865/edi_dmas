@@ -50,6 +50,7 @@ class ClaimHeader:
         ####################
         # Global variables #
         ####################
+        proc_code = self.subscriber.get_proc_code()
         today = datetime.now() # for creating control number
         interchangeFullDate = ''.join([str(today.year), f'{today.month:0>2}', f'{today.day:0>2}'])
         interchangeDate = ''.join([str(today.year % 100), f'{today.month:0>2}', f'{today.day:0>2}'])
@@ -87,7 +88,7 @@ class ClaimHeader:
         Av_Receiver = Receiver('Dept of Med Assist Svcs', Av_ISA.getReceiverId())
         
         # Billing Provider Hierarchical Level
-        Av_HL_Provider = HL_Provider_Availity(self.dilimiter, True, True)
+        Av_HL_Provider = HL_Provider_Availity(self.dilimiter, proc_code, True, True)
         
         # Billing Provider Info
         Av_BillingProvider = BillingProvider(self.dilimiter)
@@ -117,7 +118,7 @@ class ClaimHeader:
         Av_HI = HI(self.clientInfo['diagcode'][0], self.clientInfo['diagcode'][1:])
         
         # Rendering provider (Optional) PCA part
-        Av_RenderingProvider = RenderingProvider(True, self.dilimiter, Taxonomy('PE').getSegment())
+        Av_RenderingProvider = RenderingProvider(True, self.dilimiter, Taxonomy('PE', proc_code).getSegment())
         #if self.pca != '':
         #    Av_RenderingProvider = RenderingProvider(True, self.pca['firstname'], self.pca['lastname'])
             
