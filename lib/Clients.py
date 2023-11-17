@@ -47,6 +47,5 @@ class Clients:
             'dob': '19940620',
             'sex': 'M',
             'diagcode': ['F840']
-        },
-        '10705
+        }
     }
