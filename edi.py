@@ -191,7 +191,7 @@ connection = conn.getConnection()
 cursor = connection.cursor()
 # retrieve data from db. Proceed if data is returned otherwise exit
 try:
-    sql = 'select pca_first_name, pca_last_name, pca_username, recipient_first_name, recipient_last_name, procedure_code, service_date, payer_code, work_units, adjusted_units, unit_rate, modifier, service_address1, service_address2, service_city, service_state, service_zip, end_address1, end_address2, end_city, end_state, end_zip, medicaid_id, auth_number, clock_in, clock_out from visits_staging'
+    sql = 'select pca_first_name, pca_last_name, pca_username, recipient_first_name, recipient_last_name, procedure_code, service_date, payer_code, work_units, adjusted_units, unit_rate, billable_amount, modifier, service_address1, service_address2, service_city, service_state, service_zip, end_address1, end_address2, end_city, end_state, end_zip, medicaid_id, auth_number, clock_in, clock_out from visits_staging'
     
     if client_medicaid_ID != '':
         sql = sql + ' where medicaid_id = \'' + client_medicaid_ID + '\''  
@@ -203,8 +203,8 @@ try:
     sql = sql + ' order by service_date'
     cursor.execute(sql)    
     for row in cursor.fetchall(): 
-        clockInTime, clockOutTime = time_to_string(row[24]), time_to_string(row[25]), 
-        visit = Visit(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20], row[21], row[22], row[23], clockInTime, clockOutTime)
+        clockInTime, clockOutTime = time_to_string(row[25]), time_to_string(row[26]), 
+        visit = Visit(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20], row[21], row[22], row[23], row[24], clockInTime, clockOutTime)
         
         med_id = visit.get_medicaid_id() + ':' + visit.get_proc_code()
         if not med_id in visits:
@@ -219,7 +219,7 @@ finally:
 # for each client do the following if batch creation
 for key in visits.keys():
     proc_code = key.split(':')[1]
-    total_billed = sum([v.get_units() * v.get_rate() for v in visits[key]])
+    total_billed = sum([v.get_billable() for v in visits[key]])
     claimHeader = ClaimHeader(dilimiter, starting_index, interchange_type, claim_freq_type, total_billed, visits[key][0], claimToReplace, attachment, attachment_index)
 
     (interchangeDate, subscriberID, resultList) = claimHeader.get()

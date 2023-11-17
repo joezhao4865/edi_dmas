@@ -1,5 +1,5 @@
 class Visit:
-    def __init__(self, pcafirst, pcalast, pcaId, firstname, lastname, proc, service_date, payer, work_units, adjusted_units, unit_rate, modifier, service_address1, service_address2, service_city, service_state, service_zip, end_address1, end_address2, end_city, end_state, end_zip, medicaid_id, auth_number, clockIn, clockOut):
+    def __init__(self, pcafirst, pcalast, pcaId, firstname, lastname, proc, service_date, payer, work_units, adjusted_units, unit_rate, billed_amount, modifier, service_address1, service_address2, service_city, service_state, service_zip, end_address1, end_address2, end_city, end_state, end_zip, medicaid_id, auth_number, clockIn, clockOut):
         self.pca_first = pcafirst
         self.pca_last = pcalast
         self.pcaId = pcaId
@@ -11,6 +11,7 @@ class Visit:
         self.units = work_units
         self.adjusted_units = adjusted_units
         self.rate = unit_rate
+        self.billable_amount = billed_amount
         self.modifier = modifier
         self.startAddressline1 = service_address1
         self.startAddressline2 = service_address2
@@ -57,4 +58,6 @@ class Visit:
         return self.medicaidID
     def get_auth_number(self):
         return self.authNumber
+    def get_billable(self):
+        return self.billable_amount
     
