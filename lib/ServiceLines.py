@@ -37,10 +37,10 @@ class ServiceLines:
     def get(self):
         for i in range(len(self.dataList)):
             v = self.dataList[i]
-            repeatedService = v.modifier == '76'
+            #repeatedService = v.modifier in ['76', '77']
             diagPointers = ':'.join([str(x) for x in range(1, len(Clients.clients[self.patientID]['diagcode'])+1)])
             
-            Av_ServiceLineHeader = ServiceLineHeader(self.dilimiter, i+1, self.dataList[i].get_proc_code(), '{:.2f}'.format(v.get_billable()), v.get_units(), v.get_zip(), diagPointers, v.clock_in+'-'+v.clock_out, self.rangedService, repeatedService).getSegment()
+            Av_ServiceLineHeader = ServiceLineHeader(self.dilimiter, i+1, self.dataList[i].get_proc_code(), '{:.2f}'.format(v.get_billable()), v.get_units(), v.get_zip(), diagPointers, v.clock_in+'-'+v.clock_out, self.rangedService, v.modifier).getSegment()
             
             Av_ServiceDate = ServiceDate(v.get_service_date(), self.rangedService, self.serviceEndDate).getSegment()
             

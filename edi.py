@@ -27,6 +27,9 @@ def CollectFiles(rootpath, destpath):
 def time_to_string(date1):
     return ''.join(str(date1).split(' ')[1].split(':')[:2])
 
+def clean_file(file_content):
+    return re.sub(r'\*+~', '~', file_content)
+
 claimToReplace = ''
 today = datetime.now()
 currentYear = today.year
@@ -246,9 +249,9 @@ for key in visits.keys():
         if not os.path.exists(storagePath):
             os.makedirs(storagePath)
         with open(''.join([storagePath,'\\',interchangeDate,'_',visits[key][0].get_first_name()[0],visits[key][0].get_last_name()[0],proc_code,currentTime,interchange_type.upper(),'.txt']), 'w') as f:   
-            f.write(outputData.getAvailityData())
+            f.write(clean_file(outputData.getAvailityData()))
     else:   
-        print(outputData.getAvailityData())
+        print(clean_file(outputData.getAvailityData()))
 
 if interchange_type in ['p', 'P']:
     CollectFiles(parentDir, parentDir)
