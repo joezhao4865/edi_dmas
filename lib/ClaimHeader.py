@@ -55,6 +55,7 @@ class ClaimHeader:
         interchangeFullDate = ''.join([str(today.year), f'{today.month:0>2}', f'{today.day:0>2}'])
         interchangeDate = ''.join([str(today.year % 100), f'{today.month:0>2}', f'{today.day:0>2}'])
         interchangeTime = ''.join([f'{today.hour:0>2}', f'{today.minute:0>2}'])
+        g_control_number = interchangeDate[-4:].strip('0')+f'{self.startingIndex:0>5}'
         controlNumber = interchangeDate[-4:]+f'{self.startingIndex:0>5}'
         attachment_control_number = ''.join([self.subscriber.medicaidID, f'{today.month:0>2}', f'{today.day:0>2}', str(today.year), f'{self.attachmentIdx:0>5}']) if self.attachment else ''
         #############################
@@ -65,8 +66,8 @@ class ClaimHeader:
         Av_IEA = IEA_Availity('1', controlNumber)
         
         # GS/GE Segment
-        Av_GS = GS_Availity(Av_ISA.getSenderId(), Av_ISA.getReceiverId(), interchangeFullDate, interchangeTime, controlNumber)
-        Av_GE = GE_Availity('1', controlNumber)
+        Av_GS = GS_Availity(Av_ISA.getSenderId(), Av_ISA.getReceiverId(), interchangeFullDate, interchangeTime, g_control_number)
+        Av_GE = GE_Availity('1', g_control_number)
         
         #ST Segment       
         # st control number starts with 0001 and increments by 1 per gs

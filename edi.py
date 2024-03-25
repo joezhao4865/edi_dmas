@@ -185,6 +185,9 @@ if service_end_date == '':
 else:
     service_end_date = '20' + service_end_date
 
+service_type = input('Service type: ').strip()
+
+
 dilimiter = ('', '\n')[interchange_type in ['l', 'L']] 
 
 visits = {}
@@ -203,7 +206,10 @@ try:
         
     sql = sql + ' and service_date between \'' + service_start_date + '\' and \'' + service_end_date + '\''
     #sql = sql + ' group by recipient_first_name, recipient_last_name, procedure_code, service_date, payer_code, unit_rate,  service_address1, service_address2, service_city, service_state, service_zip, medicaid_id, auth_number'
+    if service_type != '':
+        sql = sql + ' and procedure_code = \'' + service_type + '\''
     sql = sql + ' order by service_date'
+    
     cursor.execute(sql)    
     for row in cursor.fetchall(): 
         clockInTime, clockOutTime = time_to_string(row[25]), time_to_string(row[26]), 
